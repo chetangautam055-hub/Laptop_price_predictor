@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laptop Price Estimator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0f19;
+    --text: #f8fafc;
+    --text-muted: #94a3b8;
+    --accent-start: #6366f1;
+    --accent-end: #8b5cf6;
+    --glass-bg: rgba(22, 30, 49, 0.55);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-hover: rgba(255, 255, 255, 0.12);
+    --input-bg: rgba(15, 23, 42, 0.6);
+    --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    font-family: var(--font-sans);
+    color: var(--text);
+    background-color: var(--bg);
+    background-image: 
+      radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.25) 0%, transparent 45%),
+      radial-gradient(circle at 85% 20%, rgba(139, 92, 246, 0.2) 0%, transparent 40%),
+      radial-gradient(circle at 50% 85%, rgba(236, 72, 153, 0.15) 0%, transparent 50%);
+    background-attachment: fixed;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 36px 20px 60px;
+  }
+
+  /* Header */
+  header {
+    margin-bottom: 32px;
+  }
+  .brand {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #818cf8;
+    margin-bottom: 6px;
+  }
+  h1 {
+    margin: 0;
+    font-size: clamp(26px, 4vw, 36px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, #ffffff 30%, #a5b4fc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Glass Card Base */
+  .glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Layout: 70/30 Split for better space utilization */
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 28px;
+    align-items: start;
+  }
+  @media (max-width: 900px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+
+  .form-panel {
+    padding: 32px;
+  }
+
+  .section-title {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0 0 24px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  /* Form Grid */
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  .field { margin-bottom: 20px; }
+  .field.full { grid-column: 1 / -1; }
+
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #cbd5e1;
+    margin-bottom: 8px;
+  }
+
+  select, input[type=number] {
+    width: 100%;
+    background: var(--input-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    padding: 12px 14px;
+    outline: none;
+    transition: all 0.2s ease;
+  }
+  select:focus, input:focus {
+    border-color: #818cf8;
+    box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.25);
+    background: rgba(15, 23, 42, 0.85);
+  }
+  select { appearance: none; cursor: pointer; }
+
+  .toggle-group {
+    display: flex;
+    gap: 8px;
+    background: rgba(15, 23, 42, 0.4);
+    padding: 4px;
+    border-radius: 12px;
+    border: 1px solid var(--glass-border);
+  }
+  .toggle-btn {
+    flex: 1;
+    text-align: center;
+    padding: 10px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 8px;
+    color: var(--text-muted);
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.2s ease;
+  }
+  .toggle-btn.active {
+    background: linear-gradient(135deg, var(--accent-start), var(--accent-end));
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--glass-border);
+    margin: 24px 0;
+  }
+
+  .submit-btn {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--accent-start), var(--accent-end));
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+  }
+  .submit-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px rgba(99, 102, 241, 0.4);
+  }
+  .submit-btn:active { transform: translateY(1px); }
+  .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  /* Compact Sticky Readout Panel */
+  .readout-panel {
+    padding: 28px 24px;
+    text-align: center;
+    position: sticky;
+    top: 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .readout-panel .lbl {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .price {
+    font-family: var(--font-mono);
+    font-size: 38px;
+    font-weight: 700;
+    margin: 16px 0 6px;
+    background: linear-gradient(135deg, #38bdf8, #818cf8, #c084fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .price.idle {
+    color: var(--text-muted);
+    -webkit-text-fill-color: var(--text-muted);
+    font-size: 32px;
+  }
+  .sub-lbl {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .loading-bar {
+    width: 100%;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    margin-top: 20px;
+    overflow: hidden;
+    display: none;
+  }
+  .loading-bar.active { display: block; }
+  .loading-bar::after {
+    content: '';
+    display: block;
+    width: 40%;
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-start), var(--accent-end));
+    border-radius: 2px;
+    animation: loading 1s infinite ease-in-out;
+  }
+  @keyframes loading {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(250%); }
+  }
+
+  .status-line {
+    margin-top: 14px;
+    font-size: 12px;
+    color: #ef4444;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">Spec Estimator</div>
+    <h1>Laptop Price Calculator</h1>
+  </header>
+
+  <div class="grid">
+    <!-- LEFT: FORM -->
+    <div class="glass-card form-panel">
+      <div class="section-title">
+        <span>Hardware Specifications</span>
+        <span style="font-size:12px; font-weight:400;">12 Fields</span>
+      </div>
+
+      <form id="specForm">
+        <div class="field-row">
+          <div class="field">
+            <label for="company">Company</label>
+            <select id="company">
+              <option>Apple</option><option>HP</option><option>Acer</option>
+              <option selected>Asus</option><option>Dell</option><option>Lenovo</option>
+              <option>MSI</option><option>Microsoft</option><option>Samsung</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="typeName">Type</label>
+            <select id="typeName">
+              <option>Ultrabook</option><option selected>Notebook</option>
+              <option>Gaming</option><option>2 in 1 Convertible</option>
+              <option>Workstation</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="ram">RAM (GB)</label>
+            <select id="ram">
+              <option>4</option><option selected>8</option>
+              <option>16</option><option>32</option><option>64</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="weight">Weight (kg)</label>
+            <input type="number" id="weight" step="0.01" min="0.5" max="5" value="1.80">
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="screenSize">Screen Size (in)</label>
+            <input type="number" id="screenSize" step="0.1" min="10" max="18" value="15.6">
+          </div>
+          <div class="field">
+            <label for="resolution">Resolution</label>
+            <select id="resolution">
+              <option value="1920x1080" selected>1920 x 1080</option>
+              <option value="2560x1440">2560 x 1440</option>
+              <option value="2560x1600">2560 x 1600</option>
+              <option value="2880x1800">2880 x 1800</option>
+              <option value="3840x2160">3840 x 2160</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label>Touchscreen</label>
+            <div class="toggle-group" data-toggle="touchscreen">
+              <div class="toggle-btn" data-val="1">Yes</div>
+              <div class="toggle-btn active" data-val="0">No</div>
+            </div>
+          </div>
+          <div class="field">
+            <label>IPS Panel</label>
+            <div class="toggle-group" data-toggle="ips">
+              <div class="toggle-btn" data-val="1">Yes</div>
+              <div class="toggle-btn active" data-val="0">No</div>
+            </div>
+          </div>
+        </div>
+
+        <hr class="divider">
+
+        <div class="field-row">
+          <div class="field">
+            <label for="cpuBrand">CPU Brand</label>
+            <select id="cpuBrand">
+              <option>Intel Core i3</option>
+              <option selected>Intel Core i5</option>
+              <option>Intel Core i7</option>
+              <option>AMD Processor</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="gpuBrand">GPU Brand</label>
+            <select id="gpuBrand">
+              <option selected>Intel</option><option>Nvidia</option><option>AMD</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="hdd">HDD (GB)</label>
+            <select id="hdd">
+              <option selected>0</option><option>512</option><option>1024</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="ssd">SSD (GB)</label>
+            <select id="ssd">
+              <option>0</option><option>128</option>
+              <option selected>256</option><option>512</option><option>1024</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field full">
+          <label for="os">Operating System</label>
+          <select id="os">
+            <option selected>Windows</option><option>Mac</option><option>Others/No OS/Linux</option>
+          </select>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">Calculate Price →</button>
+      </form>
+    </div>
+
+    <!-- RIGHT: READOUT (Compact Sticky Panel) -->
+    <div class="glass-card readout-panel">
+      <div class="lbl">Estimated Price</div>
+      <div class="price idle" id="priceOut">— — —</div>
+      <div class="sub-lbl" id="priceSub">Awaiting calculation</div>
+      <div class="loading-bar" id="loadingBar"></div>
+      <div class="status-line" id="statusLine"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API_BASE = "https://web-production-8e0930.up.railway.app";
+  const PREDICT_PATH = "/predict";
+
+  const CONFIG = {
+    fieldMap: {
+      company:     'company',
+      typeName:    'type_name',
+      ram:         'ram',
+      weight:      'weight',
+      touchscreen: 'touchscreen',
+      ips:         'ips',
+      screenSize:  'screen_size',
+      resolution:  'resolution',
+      cpuBrand:    'cpu_brand',
+      hdd:         'hdd',
+      ssd:         'ssd',
+      gpuBrand:    'gpu_brand',
+      os:          'os'
+    }
+  };
+
+  const $ = (id) => document.getElementById(id);
+
+  // Toggle buttons logic
+  document.querySelectorAll('.toggle-group[data-toggle]').forEach(group => {
+    group.addEventListener('click', (e) => {
+      const btn = e.target.closest('.toggle-btn');
+      if(!btn) return;
+      group.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
+  function getToggleVal(name) {
+    const active = document.querySelector(`.toggle-group[data-toggle="${name}"] .toggle-btn.active`);
+    return active ? parseInt(active.dataset.val, 10) : 0;
+  }
+
+  function buildPayload() {
+    const raw = {
+      company: $('company').value,
+      typeName: $('typeName').value,
+      ram: parseInt($('ram').value, 10),
+      weight: parseFloat($('weight').value),
+      touchscreen: Boolean(getToggleVal('touchscreen')),
+      ips: Boolean(getToggleVal('ips')),
+      screenSize: parseFloat($('screenSize').value),
+      resolution: $('resolution').value,
+      cpuBrand: $('cpuBrand').value,
+      hdd: parseInt($('hdd').value, 10),
+      ssd: parseInt($('ssd').value, 10),
+      gpuBrand: $('gpuBrand').value,
+      os: $('os').value
+    };
+    const payload = {};
+    Object.keys(raw).forEach(k => {
+      payload[CONFIG.fieldMap[k] || k] = raw[k];
+    });
+    return payload;
+  }
+
+  function fillSelect(selectEl, values) {
+    if(!values || !values.length) return;
+    const current = selectEl.value;
+    selectEl.innerHTML = '';
+    values.forEach(v => {
+      const opt = document.createElement('option');
+      opt.value = v; opt.textContent = v;
+      selectEl.appendChild(opt);
+    });
+    if(values.includes(current)) selectEl.value = current;
+  }
+
+  async function loadOptions() {
+    try {
+      const res = await fetch(API_BASE + '/options');
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      const opts = await res.json();
+      fillSelect($('company'), opts.company);
+      fillSelect($('typeName'), opts.type_name);
+      fillSelect($('cpuBrand'), opts.cpu_brand);
+      fillSelect($('gpuBrand'), opts.gpu_brand);
+      fillSelect($('os'), opts.os);
+      if(opts.ram_options && opts.ram_options.length) {
+        fillSelect($('ram'), opts.ram_options.map(String));
+      }
+    } catch(err) {
+      console.warn('Using fallback options.', err);
+    }
+  }
+  loadOptions();
+
+  function extractPrice(data) {
+    if (typeof data === 'number') return data;
+    if (typeof data === 'string' && !isNaN(parseFloat(data))) return parseFloat(data);
+    const keys = ['predicted_price','prediction','price','result','output','pred'];
+    for(const k of keys) {
+      if (data && data[k] !== undefined) {
+        const v = Array.isArray(data[k]) ? data[k][0] : data[k];
+        if (typeof v === 'number') return v;
+        if (typeof v === 'string' && !isNaN(parseFloat(v))) return parseFloat(v);
+      }
+    }
+    return null;
+  }
+
+  function fmtINR(n) {
+    return '₹' + Math.round(n).toLocaleString('en-IN');
+  }
+
+  const form = $('specForm');
+  const submitBtn = $('submitBtn');
+  const priceOut = $('priceOut');
+  const priceSub = $('priceSub');
+  const loadingBar = $('loadingBar');
+  const statusLine = $('statusLine');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const url = API_BASE + PREDICT_PATH;
+    const payload = buildPayload();
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Calculating…';
+    loadingBar.classList.add('active');
+    priceOut.classList.add('idle');
+    priceOut.textContent = '— — —';
+    priceSub.textContent = 'Connecting to server...';
+    statusLine.textContent = '';
+
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if(!res.ok) throw new Error(`Server returned HTTP ${res.status}`);
+
+      const data = await res.json();
+      let value = extractPrice(data);
+
+      if (value === null) {
+        statusLine.textContent = 'Unable to parse price from response';
+        priceSub.textContent = 'Error';
+        priceOut.textContent = '?';
+        priceOut.classList.remove('idle');
+      } else {
+        priceOut.classList.remove('idle');
+        priceOut.textContent = fmtINR(value);
+        priceSub.textContent = 'Estimated market value';
+      }
+    } catch(err) {
+      priceOut.textContent = '— — —';
+      priceOut.classList.add('idle');
+      priceSub.textContent = 'Calculation failed';
+      statusLine.textContent = err.message;
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Calculate Price →';
+      loadingBar.classList.remove('active');
+    }
+  });
+</script>
+</body>
+</html>
